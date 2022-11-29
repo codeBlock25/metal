@@ -195,34 +195,38 @@ class Mine<T extends Ore, U extends Ore> implements MineInterface<T, U> {
       }
       loading = false;
       mining = false;
-      if (ironPath != null && (ironPath?.isNotEmpty ?? false)) {
-        final data = flatten(value.data ?? <String, dynamic>{},
+      if (ironPath != null || (ironPath?.isNotEmpty ?? false)) {
+        final dataFromPath = flatten(value.data ?? <String, dynamic>{},
             maxDepth: ironPathDepth ?? 0, safe: true);
-        iron = _ironModel.cast(data);
-        classData = _ironModel.cast(data);
+        iron = _ironModel.cast(dataFromPath[ironPath]);
+        classData = iron;
       } else {
         iron = _ironModel.cast(value.data);
-        classData = _ironModel.cast(value.data);
+        classData = iron;
       }
       data = value.data;
-      rawOre = value.data;
+      rawOre = data;
       _status.value = ProductionProcess.mined;
       return ProductionProcess.mined;
     } on DioError catch (error) {
       reset();
       _status.value = ProductionProcess.error;
-      final dataError = flatten(error.response?.data ?? <String, dynamic>{},
-          maxDepth: errorPathDepth ?? 0, safe: true);
+      final dataError = errorPath == null
+          ? error.response?.data ?? <String, dynamic>{}
+          : flatten(error.response?.data ?? <String, dynamic>{},
+              maxDepth: errorPathDepth ?? 0, safe: true);
       metalError = MetalError<U>(
         message: error.message,
         rawError: error,
-        error: _errorModel.cast(dataError),
+        error: _errorModel
+            .cast(errorPath == null ? dataError : dataError[errorPath ?? '']),
         statusCode: error.response?.statusCode ?? 500,
       );
       throw MetalError<U>(
         message: error.message,
         rawError: error,
-        error: _errorModel.cast(dataError),
+        error: _errorModel
+            .cast(errorPath == null ? dataError : dataError[errorPath ?? '']),
         statusCode: error.response?.statusCode ?? 500,
       );
     } catch (error) {
@@ -269,6 +273,8 @@ class Mine<T extends Ore, U extends Ore> implements MineInterface<T, U> {
     loading = false;
     mining = false;
     rawOre = null;
+    _status.value = ProductionProcess.stale;
+    status = ProductionProcess.stale;
   }
 
   @override
