@@ -143,7 +143,9 @@ class Mine<T extends Ore, U extends Ore> implements MineInterface<T, U> {
   ///
   /// This function takes in an optional [data] and [query] for every request.
   Future<ProductionProcess> mine(
-      [Map<String, dynamic>? data, Map<String, dynamic>? query]) async {
+      {Map<String, dynamic>? data,
+      Map<String, dynamic>? query,
+      String? miningPath = ''}) async {
     reset();
     loading = true;
     mining = true;
@@ -153,20 +155,20 @@ class Mine<T extends Ore, U extends Ore> implements MineInterface<T, U> {
       switch (_miningMethod) {
         case MiningMethod.get:
           value = await _uri.get(
-            '/',
+            '/${miningPath ?? ''}',
             queryParameters: query,
           );
           break;
         case MiningMethod.post:
           value = await _uri.post(
-            '/',
+            '/${miningPath ?? ''}',
             data: data,
             queryParameters: query,
           );
           break;
         case MiningMethod.delete:
           value = await _uri.delete(
-            '/',
+            '/${miningPath ?? ''}',
             data: data,
             queryParameters: query,
           );
@@ -174,21 +176,21 @@ class Mine<T extends Ore, U extends Ore> implements MineInterface<T, U> {
 
         case MiningMethod.patch:
           value = await _uri.patch(
-            '/',
+            '/${miningPath ?? ''}',
             data: data,
             queryParameters: query,
           );
           break;
         case MiningMethod.put:
           value = await _uri.put(
-            '/',
+            '/${miningPath ?? ''}',
             data: data,
             queryParameters: query,
           );
           break;
         default:
           value = await _uri.get(
-            '/',
+            '/${miningPath ?? ''}',
             queryParameters: query,
           );
           break;

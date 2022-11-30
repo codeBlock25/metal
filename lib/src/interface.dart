@@ -91,7 +91,9 @@ abstract class MineInterface<T extends Ore, U extends Ore> {
   @protected
   @factory
   Future<ProductionProcess> mine(
-      Map<String, dynamic>? data, Map<String, dynamic>? query);
+      {Map<String, dynamic>? data,
+      Map<String, dynamic>? query,
+      String? miningPath});
 }
 
 /// A Metal class interface
