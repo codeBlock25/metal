@@ -173,7 +173,6 @@ class Mine<T extends Ore, U extends Ore> implements MineInterface<T, U> {
             queryParameters: query,
           );
           break;
-
         case MiningMethod.patch:
           value = await _uri.patch(
             '/${miningPath ?? ''}',
@@ -213,22 +212,30 @@ class Mine<T extends Ore, U extends Ore> implements MineInterface<T, U> {
     } on DioError catch (error) {
       reset();
       _status.value = ProductionProcess.error;
-      final dataError = errorPath == null
-          ? error.response?.data ?? <String, dynamic>{}
-          : flatten(error.response?.data ?? <String, dynamic>{},
-              maxDepth: errorPathDepth ?? 0, safe: true);
-      metalError = MetalError<U>(
-        message: error.message,
-        rawError: error,
-        error: _errorModel
-            .cast(errorPath == null ? dataError : dataError[errorPath ?? '']),
-        statusCode: error.response?.statusCode ?? 500,
-      );
+      try {
+        final dataError = errorPath == null
+            ? error.response?.data ?? <String, dynamic>{}
+            : flatten(error.response?.data ?? <String, dynamic>{},
+                maxDepth: errorPathDepth ?? 0, safe: true);
+        metalError = MetalError<U>(
+          message: error.message,
+          rawError: error,
+          error: _errorModel
+              .cast(errorPath == null ? dataError : dataError[errorPath ?? '']),
+          statusCode: error.response?.statusCode ?? 500,
+        );
+      } catch (e) {
+        metalError = MetalError<U>(
+          message: error.message,
+          rawError: error,
+          error: null,
+          statusCode: error.response?.statusCode ?? 500,
+        );
+      }
       throw MetalError<U>(
         message: error.message,
         rawError: error,
-        error: _errorModel
-            .cast(errorPath == null ? dataError : dataError[errorPath ?? '']),
+        error: null,
         statusCode: error.response?.statusCode ?? 500,
       );
     } catch (error) {
